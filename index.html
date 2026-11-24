@@ -173,6 +173,8 @@ input.ed{flex:none;width:130px;min-width:0}textarea.ed{width:190px;resize:vertic
 <div class="filters"><button class="reset" id="ld">Load pasted data</button><input id="file" type="file" accept=".csv,.tsv,.txt" aria-label="Upload CSV or TSV"></div>
 <p class="note">Live sync and status updates to the sheet only work in a downloaded copy of this file, because the published page blocks requests to other sites. Paste either an Apps Script web app link (reads the sheet and writes status changes back) or a view-only Google Sheet link (read only).</p>
 <div class="filters"><input id="url" type="url" placeholder="Apps Script link or Google Sheet link" aria-label="Google Sheet link"><button class="reset" id="sy">Sync now</button></div>
+<div class="filters"><button class="reset" id="cp">Copy setup link for another device</button><button class="reset" id="fg">Forget saved link</button></div>
+<p class="note" id="lk"></p>
 </div></div>
 <div id="vdash">
 <div class="kpis" id="kpis"></div>
@@ -202,7 +204,7 @@ input.ed{flex:none;width:130px;min-width:0}textarea.ed{width:190px;resize:vertic
 
 <div class="toast" id="toast" role="status"></div>
 <script>
-var CFG={scriptUrl:""}; /* when hosting, paste your Apps Script link (https://script.google.com/.../exec?key=YOUR_KEY) between the quotes so every visitor loads the sheet automatically */
+var CFG={scriptUrl:"https://script.google.com/macros/s/AKfycbxnC3FcgdXi28lXlpHVklDLbOGMWFHltItFjcUuCbeX-iQ72XPmRmZSUAHslH0_1iM5iA/exec?key=kccl2026"}; /* when hosting, paste your Apps Script link (https://script.google.com/.../exec?key=YOUR_KEY) between the quotes so every visitor loads the sheet automatically */
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var D=[
 ["Kerala",1,"CRF generation for digital customers","Generate CRF from LCO code only; no distributor or sub-distributor dependency.","Discussion point; document shared","20-11-2026","Moved to QA","Pavan"],
@@ -368,7 +370,14 @@ function sync(quiet){var u=$("url").value.trim();if(!u){if(!quiet)say("Paste a G
  else if(m.indexOf("HTTP")===0)say("Google returned an error ("+m+"). Check the link ends with /exec and the web app is deployed.",true);
  else say("Could not reach Google. Check the link is the /exec web app link with access set to Anyone, and that you opened the downloaded file, not the published preview.",true)})}
 $("sy").onclick=function(){sync(false)};
-function saveUrl(show){var u=$("url").value.trim();try{if(u)localStorage.setItem(URLK,u);else localStorage.removeItem(URLK);if(show)say(u?"Link saved in this browser":"Link removed",false)}catch(e){say("This browser is blocking storage (private window or a privacy setting), so the link cannot be saved. Use a normal window or allow site data for this page.",true)}}
+function saveUrl(show){var u=$("url").value.trim();try{if(u)localStorage.setItem(URLK,u);else localStorage.removeItem(URLK);showSaved();if(show)say(u?"Link saved in this browser":"Link removed",false)}catch(e){say("This browser is blocking storage (private window or a privacy setting), so the link cannot be saved. Use a normal window or allow site data for this page.",true)}}
+function showSaved(){var u=null,ok=true;try{u=localStorage.getItem(URLK)}catch(e){ok=false}
+ $("lk").textContent=!ok?"Storage is blocked in this browser, so nothing can be saved here.":u?"Saved in this browser: ..."+u.split("?")[0].slice(-18)+" (with key)":"No link saved in this browser yet."}
+$("cp").onclick=function(){var u=$("url").value.trim();if(!u){say("Paste the link first.",true);return}
+ var l=location.href.split("#")[0]+"#setup="+encodeURIComponent(btoa(u));
+ (navigator.clipboard?navigator.clipboard.writeText(l):Promise.reject()).then(function(){say("Setup link copied. Open it once on the other device. Keep it private, it contains the key.",false)}).catch(function(){window.prompt("Copy this setup link:",l)})};
+$("fg").onclick=function(){try{localStorage.removeItem(URLK)}catch(e){}$("url").value="";showSaved();say("Link removed from this browser",false)};
+showSaved();
 $("url").onchange=function(){saveUrl(true)};$("url").oninput=function(){saveUrl(false)};
 try{localStorage.setItem("kee-probe","1");localStorage.removeItem("kee-probe")}catch(e){say("This browser is blocking storage (private window or a privacy setting), so the link cannot be saved. Use a normal window or allow site data for this page.",true)}
 var OVK="kee-status-ov";
@@ -456,8 +465,9 @@ function saveMastersToSheet(quiet){if(!isScript()){toast("Connect the Apps Scrip
   return jobs.reduce(function(p,jb){return p.then(function(){return postMaster("add",jb[0],jb[1])})},Promise.resolve()).then(function(){toast("Saved "+jobs.length+" name"+(jobs.length>1?"s":"")+" to the Masters tab")})}).catch(function(){toast("Could not save the lists to the sheet",true)})}
 $("msave").onclick=function(){saveMastersToSheet(false)};
 function openMasters(k){setView("masters");renderMasters(k)}
+(function(){var m=location.hash.match(/^#setup=(.+)$/);if(!m)return;try{var x=atob(decodeURIComponent(m[1]));localStorage.setItem(URLK,x);history.replaceState(null,"",location.pathname+location.search)}catch(e){}})();
 (function(){var t=null,u=null;try{t=localStorage.getItem(KEY);u=localStorage.getItem(URLK)}catch(e){}
- if(!u&&CFG.scriptUrl)u=CFG.scriptUrl;
+ if(CFG.scriptUrl)u=CFG.scriptUrl;
  if(u)$("url").value=u;if(t)apply(t,"Saved copy",false);else{var ov0=getOv();items.forEach(function(i){ap(i,ov0)});render()}if(u)sync(true)})();
 var APK="kee-appearance";
 function getAp(){try{return JSON.parse(localStorage.getItem(APK)||"{}")}catch(e){return {}}}
@@ -473,6 +483,7 @@ Object.keys(VIEWS).forEach(function(k){$(VIEWS[k][1]).onclick=function(){setView
 window.addEventListener("hashchange",function(){setView(location.hash.slice(1))});
 render();
 setView(location.hash.slice(1));
+showSaved();
 </script>
 </body>
 </html>
