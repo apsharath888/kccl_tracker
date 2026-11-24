@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>KCCL Tracker</title>
 <style>
@@ -84,6 +85,44 @@ tr:last-child td{border-bottom:0}
 .owners{align-items:start}.oh{cursor:pointer}
 .ol{list-style:none;margin:10px 0 8px;padding:8px 0 0;border-top:1px solid var(--line);font-size:13px}.ol li{margin:7px 0}
 .olink{font-size:13px}
+.sd{display:inline-block;width:12px;height:12px;border-radius:50%;flex:none;margin:0 6px}
+.msort{display:none}.mob{display:none}
+.mgrid{grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr))!important}
+.owners{grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr))!important}
+@media (max-width:760px){
+ body{font-size:15px}
+ .dsk{display:none}.mob{display:inline}
+ .top{position:static;padding:10px 12px;gap:8px}
+ .top h1{font-size:18px;flex:1}
+ .top .tabs{position:fixed;left:0;right:0;bottom:0;z-index:25;flex:none;flex-wrap:nowrap;gap:4px;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));background:var(--surf);border-top:1px solid var(--line)}
+ .tabs button{flex:1;min-width:0;min-height:44px;padding:6px 4px;border-radius:10px;font-size:12px;line-height:1.2}
+ main{padding:12px 12px 96px}
+ .apanel{left:12px;right:12px;width:auto;top:56px}
+ .toast{bottom:84px}
+ .kpis{grid-template-columns:repeat(2,1fr)}
+ .kpi b{font-size:24px}
+ .lb{padding:10px 12px}
+ .filters select,.msort{flex:1 1 44%;display:block;min-height:42px}
+ .filters input{flex:1 1 100%;min-height:42px}
+ .filters .reset{flex:1 1 100%;min-height:42px}
+ input,select,textarea{font-size:16px}
+ .wrap{border:0;background:none;overflow:visible}
+ table,tbody{display:block;min-width:0;width:100%}
+ thead{display:none}
+ tr{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+ tr.rl{background:color-mix(in srgb,var(--red) 8%,var(--surf));border-left:4px solid var(--red)}
+ tr.rs{background:color-mix(in srgb,var(--amb) 8%,var(--surf));border-left:4px solid var(--amb)}
+ td,tr.rl td,tr.rs td{display:block;border:0;padding:0;background:none;box-shadow:none;min-width:0}
+ td.c-reg{grid-column:1/-1;color:var(--mut);font-size:12px}
+ td.c-feat{grid-column:1/-1;font-size:16px}
+ td.wide{grid-column:1/-1}
+ td[data-l]:before{content:attr(data-l);display:block;font-size:11px;color:var(--mut);margin-bottom:3px}
+ .ed,input.ed,textarea.ed,.stsel{width:100%;min-height:42px;font-size:16px}
+ .pk{max-width:100%;min-height:42px}
+ .ol{font-size:14px}
+ .pop{max-width:calc(100vw - 16px)}
+ .mgrid{gap:10px}
+}
 .hb{display:flex;gap:8px;flex-wrap:wrap}
 #srcst:empty{display:none}
 .kpi.acc b{color:var(--acc)}
@@ -123,7 +162,7 @@ input.ed{flex:none;width:130px;min-width:0}textarea.ed{width:190px;resize:vertic
 </style>
 </head>
 <body>
-<header class="top"><h1>KCCL Tracker</h1><nav class="tabs" aria-label="Menu"><button type="button" id="tdash" aria-pressed="true">Dashboard</button><button type="button" id="tlist" aria-pressed="false">List</button><button type="button" id="tmast" aria-pressed="false">Masters</button><button type="button" id="tconn" aria-pressed="false">Connect Google Sheet</button></nav><button type="button" class="reset" id="apb" aria-expanded="false">Appearance</button></header>
+<header class="top"><h1>KCCL Tracker</h1><nav class="tabs" aria-label="Menu"><button type="button" id="tdash" aria-pressed="true">Dashboard</button><button type="button" id="tlist" aria-pressed="false">List</button><button type="button" id="tmast" aria-pressed="false">Masters</button><button type="button" id="tconn" aria-pressed="false"><span class="dsk">Connect Google Sheet</span><span class="mob">Connect</span></button></nav><button type="button" class="reset" id="apb" aria-expanded="false">Appearance</button></header>
 <div class="apanel" id="ap" hidden><label for="th">Theme</label><select id="th"><option value="sage">Sage</option><option value="ocean">Ocean</option><option value="violet">Violet</option><option value="midnight">Midnight</option><option value="grandline">Grand Line</option><option value="strawhats">Straw Hats</option></select><label for="fo">Font</label><select id="fo"><option value="default">Theme default</option><option value="system">System</option><option value="serif">Serif</option></select><label for="sz">Text size</label><select id="sz"><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option></select></div>
 <main>
 <p class="sub" id="asof"></p>
@@ -151,7 +190,7 @@ input.ed{flex:none;width:130px;min-width:0}textarea.ed{width:190px;resize:vertic
 <div class="filters">
 <input id="q" type="search" placeholder="Search feature, requirement, remarks" aria-label="Search">
 <select id="fr" aria-label="Region"></select>
-<select id="fs" aria-label="Status"></select><select id="fd" aria-label="Owner"></select><select id="fc" aria-label="Case owner"></select>
+<select id="fs" aria-label="Status"></select><select id="fd" aria-label="Owner"></select><select id="fc" aria-label="Case owner"></select><select id="fsort" class="msort" aria-label="Sort by"><option value="uat">Sort: UAT date</option><option value="liveD">Sort: Live date</option><option value="st">Sort: Status</option><option value="dev">Sort: Owner</option><option value="t">Sort: Feature</option><option value="reg">Sort: Region</option></select>
 <button class="reset" id="rs">Clear filters</button>
 </div>
 <div class="note" id="fn" style="margin:0 0 8px"></div>
@@ -189,7 +228,11 @@ var live=function(i){return i.st==="Moved to Live"};
 var late=function(i){return !live(i)&&i.uat&&i.uat<TODAY};
 var soon=function(i){return !live(i)&&i.uat&&i.uat>=TODAY&&(i.uat-TODAY)/864e5<=3};
 var S={q:"",reg:"",st:"",dev:"",co:"",kpi:"",sort:"uat",asc:true};
-var ST=["To Do","In Progress","Moved to QA","Moved to UAT","Moved to Live"];
+var ST=["To Do","In Progress","Moved to QA","Moved to UAT","Moved to Live"],LOCKED=["To Do","Moved to UAT","Moved to Live"],STOK=false;
+function stNames(){var m=typeof MS!=="undefined"?MS:null;if(!m){try{m=JSON.parse(localStorage.getItem("kee-masters-v1"))}catch(e){}}return m&&m.statuses&&m.statuses.length?m.statuses:ST}
+function stFor(cur){var l=ms().statuses.slice();if(cur&&l.indexOf(cur)<0)l.push(cur);return l}
+var SC={"To Do":"var(--mut)","In Progress":"var(--blu)","Moved to QA":"var(--amb)","Moved to UAT":"var(--acc)","Moved to Live":"var(--grn)"};
+function sdot(n){return '<i class="sd" style="background:'+(SC[n]||colorOf(n))+'"></i>'}
 var cls={"To Do":"s-todo","In Progress":"s-prog","Moved to QA":"s-qa","Moved to UAT":"s-uat","Moved to Live":"s-live"};
 function $(id){return document.getElementById(id)}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -220,7 +263,7 @@ function di(v){return v?v.getFullYear()+"-"+("0"+(v.getMonth()+1)).slice(-2)+"-"
 function fillFilters(){var o={},c={};ms().owners.forEach(function(n){o[n]=1});ms().cases.forEach(function(n){c[n]=1});items.forEach(function(i){if(i.dev!=="Unassigned")o[i.dev]=1;if(i.co)c[i.co]=1});
  function opts(m,all,x){return '<option value="">'+all+'</option>'+(x||"")+Object.keys(m).sort().map(function(n){return '<option>'+esc(n)+'</option>'}).join("")}
  $("fd").innerHTML=opts(o,"All owners",'<option value="Unassigned">Unassigned</option>');$("fd").value=S.dev;
- $("fc").innerHTML=opts(c,"All case owners");$("fc").value=S.co}
+ $("fc").innerHTML=opts(c,"All case owners");$("fc").value=S.co;var sl=ms().statuses.slice();items.forEach(function(i){if(sl.indexOf(i.st)<0)sl.push(i.st)});$("fs").innerHTML='<option value="">All statuses</option>'+sl.map(function(n){return '<option>'+esc(n)+'</option>'}).join("");$("fs").value=S.st;$("fsort").value=S.sort}
 function table(){
  fillFilters();
  var cols=[["reg","Region"],["t","Feature"],["dev","Owner"],["co","Case owner"],["st","Status"],["uat","UAT date"],["liveD","Live date"],["jira","Jira ticket"],["note","CC remarks"],["dr","Dev remarks"]];
@@ -235,14 +278,14 @@ function table(){
  $("tb").innerHTML=L.map(function(i){
   var a=' data-i="'+items.indexOf(i)+'" ';
   var ud=live(i)?'':late(i)?'<div class="late">'+dl(i)+' day'+(dl(i)>1?'s':'')+' late</div>':soon(i)?'<div class="soon">'+when(i)+'</div>':'';
-  return '<tr class="'+(late(i)?'rl':soon(i)?'rs':'')+'"><td>'+i.reg+' #'+i.n+'</td><td><b>'+esc(i.t)+'</b><div class="note">'+esc(i.req)+'</div></td>'
-  +'<td>'+pkBtn("dev",a,i.dev==="Unassigned"?"":i.dev)+'</td><td>'+pkBtn("co",a,i.co||"")+'</td>'
-  +'<td><select class="stsel '+cls[i.st]+'" data-f="st"'+a+'aria-label="Status of '+esc(i.t)+'">'+ST.map(function(s){return '<option'+(s===i.st?' selected':'')+'>'+s+'</option>'}).join("")+'</select></td>'
-  +'<td><input class="ed" type="date" data-f="uat"'+a+'value="'+di(i.uat)+'" aria-label="UAT date">'+ud+(i.uatS&&!i.uat?'<div class="note">'+esc(i.uatS)+'</div>':'')+'</td>'
-  +'<td><input class="ed" type="date" data-f="live"'+a+'value="'+di(i.liveD)+'" aria-label="Live date"></td>'
-  +'<td><input class="ed" data-f="jira"'+a+'value="'+esc(i.jira||"")+'" placeholder="e.g. KEE-123" aria-label="Jira ticket"></td>'
-  +'<td><textarea class="ed" rows="2" data-f="cc"'+a+'aria-label="CC remarks">'+esc(i.note||"")+'</textarea></td>'
-  +'<td><textarea class="ed" rows="2" data-f="dr"'+a+'aria-label="Dev remarks">'+esc(i.dr||"")+'</textarea></td></tr>'}).join("");
+  return '<tr class="'+(late(i)?'rl':soon(i)?'rs':'')+'"><td class="c-reg">'+i.reg+' #'+i.n+'</td><td class="c-feat"><b>'+esc(i.t)+'</b><div class="note">'+esc(i.req)+'</div></td>'
+  +'<td data-l="Owner">'+pkBtn("dev",a,i.dev==="Unassigned"?"":i.dev)+'</td><td data-l="Case owner">'+pkBtn("co",a,i.co||"")+'</td>'
+  +'<td data-l="Status"><select class="stsel '+(cls[i.st]||"s-todo")+'" data-f="st"'+a+'aria-label="Status of '+esc(i.t)+'">'+stFor(i.st).map(function(s){return '<option'+(s===i.st?' selected':'')+'>'+esc(s)+'</option>'}).join("")+'</select></td>'
+  +'<td data-l="UAT date"><input class="ed" type="date" data-f="uat"'+a+'value="'+di(i.uat)+'" aria-label="UAT date">'+ud+(i.uatS&&!i.uat?'<div class="note">'+esc(i.uatS)+'</div>':'')+'</td>'
+  +'<td data-l="Live date"><input class="ed" type="date" data-f="live"'+a+'value="'+di(i.liveD)+'" aria-label="Live date"></td>'
+  +'<td data-l="Jira ticket"><input class="ed" data-f="jira"'+a+'value="'+esc(i.jira||"")+'" placeholder="e.g. KEE-123" aria-label="Jira ticket"></td>'
+  +'<td data-l="CC remarks" class="wide"><textarea class="ed" rows="2" data-f="cc"'+a+'aria-label="CC remarks">'+esc(i.note||"")+'</textarea></td>'
+  +'<td data-l="Dev remarks" class="wide"><textarea class="ed" rows="2" data-f="dr"'+a+'aria-label="Dev remarks">'+esc(i.dr||"")+'</textarea></td></tr>'}).join("");
 }
 function pd(s){var m=(s||"").match(/(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/);return m?new Date(+m[3],+m[2]-1,+m[1]):null}
 function ds(d){return ("0"+d.getDate()).slice(-2)+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+d.getFullYear()}
@@ -274,6 +317,7 @@ opts("fs","All statuses",["To Do","In Progress","Moved to QA","Moved to UAT","Mo
 $("q").oninput=function(e){S.q=e.target.value;table()};
 $("fr").onchange=function(e){S.reg=e.target.value;table()};
 $("fd").onchange=function(e){S.dev=e.target.value;render()};
+$("fsort").onchange=function(e){S.sort=e.target.value;S.asc=true;table()};
 $("fc").onchange=function(e){S.co=e.target.value;render()};
 $("fs").onchange=function(e){S.st=e.target.value;table()};
 $("rs").onclick=function(){S={q:"",reg:"",st:"",dev:"",co:"",kpi:"",sort:"uat",asc:true};$("q").value="";$("fr").value="";$("fs").value="";render()};
@@ -301,7 +345,7 @@ function fromSheet(txt){
  var out=[],reg="";
  rows.slice(hi+1).forEach(function(r){var t=g(r,"t");if(!t)return;
   var ru=g(r,"reg").toUpperCase();if(ru)reg=ru.indexOf("REPORT")>=0?"Reports":ru.indexOf("KOLKATA")>=0?"Kolkata":ru.indexOf("KERALA")>=0?"Kerala":g(r,"reg");
-  var s=g(r,"st").toLowerCase(),st=s.indexOf("live")>=0?"Moved to Live":s.indexOf("uat")>=0?"Moved to UAT":s.indexOf("qa")>=0?"Moved to QA":s.indexOf("progress")>=0?"In Progress":"To Do";
+  var raw=g(r,"st"),s=raw.toLowerCase(),st=stNames().filter(function(x){return x.toLowerCase()===s})[0]||(!raw?"To Do":s.indexOf("live")>=0?"Moved to Live":s.indexOf("uat")>=0?"Moved to UAT":s.indexOf("qa")>=0?"Moved to QA":s.indexOf("progress")>=0?"In Progress":raw);
   var us=g(r,"uat"),m=us.match(/(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/);
   out.push({reg:reg,n:g(r,"n")||out.length+1,t:t,req:g(r,"req"),note:g(r,"note"),uatS:us,uat:m?new Date(+m[3],+m[2]-1,+m[1]):null,st:st,dev:g(r,"dev")||"Unassigned",open:!!g(r,"clar"),dr:g(r,"clar"),jira:g(r,"tk"),co:g(r,"co")||"Sharath",liveD:pd(g(r,"live"))})});
  if(!out.length)throw new Error("No rows found under the header.");
@@ -324,6 +368,9 @@ function sync(quiet){var u=$("url").value.trim();if(!u){if(!quiet)say("Paste a G
  else if(m.indexOf("HTTP")===0)say("Google returned an error ("+m+"). Check the link ends with /exec and the web app is deployed.",true);
  else say("Could not reach Google. Check the link is the /exec web app link with access set to Anyone, and that you opened the downloaded file, not the published preview.",true)})}
 $("sy").onclick=function(){sync(false)};
+function saveUrl(show){var u=$("url").value.trim();try{if(u)localStorage.setItem(URLK,u);else localStorage.removeItem(URLK);if(show)say(u?"Link saved in this browser":"Link removed",false)}catch(e){say("This browser is blocking storage (private window or a privacy setting), so the link cannot be saved. Use a normal window or allow site data for this page.",true)}}
+$("url").onchange=function(){saveUrl(true)};$("url").oninput=function(){saveUrl(false)};
+try{localStorage.setItem("kee-probe","1");localStorage.removeItem("kee-probe")}catch(e){say("This browser is blocking storage (private window or a privacy setting), so the link cannot be saved. Use a normal window or allow site data for this page.",true)}
 var OVK="kee-status-ov";
 function getOv(){try{return JSON.parse(localStorage.getItem(OVK)||"{}")}catch(e){return {}}}
 function setOv(o){try{localStorage.setItem(OVK,JSON.stringify(o))}catch(e){}}
@@ -358,14 +405,15 @@ function inits(n){var w=n.trim().split(/\s+/);return (w.length>1?w[0][0]+w[1][0]
 function av(n){return n?'<i class="av" style="background:'+colorOf(n)+'">'+esc(inits(n))+'</i>':'<i class="av none">\u2013</i>'}
 function pkBtn(f,a,v){var none=f==="dev"?"Unassigned":"Set case owner";return '<button type="button" class="pk'+(v?'':' none')+'" data-f="'+f+'"'+a+'aria-haspopup="listbox" aria-label="'+(f==="dev"?"Owner":"Case owner")+': '+esc(v||none)+'">'+(v?av(v):'')+'<span>'+esc(v||none)+'</span><b aria-hidden="true">\u25be</b></button>'}
 function ms(){if(!MS){try{MS=JSON.parse(localStorage.getItem(MSK))}catch(e){}
- if(!MS||!MS.owners){var o={},c={};items.forEach(function(i){if(i.dev!=="Unassigned")o[i.dev]=1;if(i.co)c[i.co]=1});MS={owners:Object.keys(o).sort(),cases:Object.keys(c).sort()};saveMS()}}if(!MS.cases.length){MS.cases=["Sharath"];saveMS()}return MS}
+ if(!MS||!MS.owners){var o={},c={};items.forEach(function(i){if(i.dev!=="Unassigned")o[i.dev]=1;if(i.co)c[i.co]=1});MS={owners:Object.keys(o).sort(),cases:Object.keys(c).sort()};saveMS()}}if(!MS.cases.length){MS.cases=["Sharath"];saveMS()}if(!MS.statuses||!MS.statuses.length){MS.statuses=ST.slice();saveMS()}LOCKED.forEach(function(n){if(MS.statuses.indexOf(n)<0)MS.statuses.push(n)});return MS}
 function saveMS(){try{localStorage.setItem(MSK,JSON.stringify(MS))}catch(e){}}
 function toast(m,bad){var t=$("toast");t.textContent=m;t.className="toast show"+(bad?" err":"");clearTimeout(toastT);toastT=setTimeout(function(){t.className="toast"},2800)}
 function keyOf(u){try{return new URL(u).searchParams.get("key")||""}catch(e){return ""}}
 function isScript(){return ($("url").value||"").indexOf("script.google.com")>=0}
-function pushMaster(op,kind,v){if(!isScript())return;var u=$("url").value.trim();
+function pushMaster(op,kind,v){if(!isScript())return;if(kind==="statuses"&&!STOK){toast("Status list saved in this browser only. Update the Apps Script to save it to the sheet.",true);return}var u=$("url").value.trim();
  fetch(u.split("?")[0],{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({key:keyOf(u),master:{op:op,kind:kind,value:v}})}).then(function(r){return r.json()}).then(function(j){if(!j.ok)toast("Sheet master list not updated: "+(j.error||"unknown error"),true)}).catch(function(){toast("Could not reach the sheet for the master list",true)})}
-function pullMasters(u){fetch(u.split("?")[0]+"?key="+encodeURIComponent(keyOf(u))+"&masters=1").then(function(r){return r.json()}).then(function(j){if(j&&j.owners&&(j.owners.length||j.cases.length)){MS={owners:j.owners,cases:j.cases||[]};saveMS();table()}else if(j&&j.owners)saveMastersToSheet(true)}).catch(function(){})}
+function pullMasters(u){fetch(u.split("?")[0]+"?key="+encodeURIComponent(keyOf(u))+"&masters=1").then(function(r){return r.json()}).then(function(j){if(!j||!j.owners)return;STOK=Array.isArray(j.statuses);var c=ms();
+ MS={owners:j.owners.length?j.owners:c.owners,cases:j.cases&&j.cases.length?j.cases:c.cases,statuses:STOK&&j.statuses.length?j.statuses:c.statuses};saveMS();table();saveMastersToSheet(true)}).catch(function(){})}
 function curVal(){var i=items[PK.i];return PK.f==="dev"?(i.dev==="Unassigned"?"":i.dev):(i.co||"")}
 function fillPick(){var q=$("pq").value.trim().toLowerCase(),cv=curVal(),L=ms()[PK.f==="dev"?"owners":"cases"].filter(function(n){return n.toLowerCase().indexOf(q)>=0});
  var h=q?'':'<button type="button" class="po'+(cv===""?' on':'')+'" data-v="" role="option">'+av("")+'<span>'+(PK.f==="dev"?"Unassigned":"No case owner")+'</span></button>';
@@ -385,25 +433,25 @@ $("pm").onclick=function(){var k=PK&&PK.f==="co"?"cases":"owners";closePick();op
 document.addEventListener("click",function(e){if(!$("pop").hidden&&!e.target.closest("#pop")&&!e.target.closest(".pk"))closePick()});
 document.addEventListener("scroll",function(e){if(!$("pop").hidden&&!$("pop").contains(e.target))closePick()},true);
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("pop").hidden)closePick()});
-var MK=[["owners","Owners","owner","dev"],["cases","Case owners","case owner","co"]];
+var MK=[["owners","Owners","owner","dev"],["cases","Case owners","case owner","co"],["statuses","Statuses","status","st"]];
 function renderMasters(focus){var m=ms();$("mgrid").innerHTML=MK.map(function(k){var L=m[k[0]];
- return '<div class="mcard"><h2>'+k[1]+'<span>'+L.length+'</span></h2><ul>'+L.map(function(n){var u=items.filter(function(i){return (k[3]==="dev"?i.dev:i.co)===n}).length;
-  return '<li>'+av(n)+'<span>'+esc(n)+'</span><small>'+u+' item'+(u===1?'':'s')+'</small><button type="button" class="mdel" data-k="'+k[0]+'" data-v="'+esc(n)+'" aria-label="Remove '+esc(n)+'">\u00d7</button></li>'}).join("")+'</ul>'
+ return '<div class="mcard"><h2>'+k[1]+'<span>'+L.length+'</span></h2>'+(k[0]==="statuses"?'<p class="note" style="margin:0 0 8px">To Do, Moved to UAT and Moved to Live are used by the dashboard and cannot be removed.</p>':'')+'<ul>'+L.map(function(n){var u=items.filter(function(i){return (i[k[3]]||"")===n}).length;
+  return '<li>'+(k[0]==="statuses"?sdot(n):av(n))+'<span>'+esc(n)+'</span><small>'+u+' item'+(u===1?'':'s')+'</small>'+(k[0]==="statuses"&&LOCKED.indexOf(n)>=0?'<span class="note" title="Used by the dashboard">locked</span>':'<button type="button" class="mdel" data-k="'+k[0]+'" data-v="'+esc(n)+'" aria-label="Remove '+esc(n)+'">\u00d7</button>')+'</li>'}).join("")+'</ul>'
   +'<div class="madd"><input type="text" maxlength="60" data-k="'+k[0]+'" placeholder="New '+k[2]+' name" aria-label="New '+k[2]+'"><button type="button" class="mbtn" data-k="'+k[0]+'">Add</button></div></div>'}).join("");
  if(focus){var x=[].slice.call(document.querySelectorAll(".madd input")).find(function(i){return i.dataset.k===focus});if(x)x.focus()}}
 function addM(k,inp){var v=inp.value.trim();if(!v)return toast("Type a name first",true);var L=ms()[k];
  if(L.some(function(x){return x.toLowerCase()===v.toLowerCase()}))return toast(v+" is already in the list",true);
- L.push(v);L.sort(function(a,b){return a.localeCompare(b)});saveMS();pushMaster("add",k,v);renderMasters(k);toast("Added "+v)}
+ L.push(v);if(k!=="statuses")L.sort(function(a,b){return a.localeCompare(b)});saveMS();pushMaster("add",k,v);renderMasters(k);toast("Added "+v)}
 $("mgrid").onclick=function(e){var b=e.target.closest("button");if(!b)return;var k=b.dataset.k;
  if(b.classList.contains("mbtn"))return addM(k,b.previousElementSibling);
- if(b.classList.contains("mdel")){var v=b.dataset.v,id=k+"|"+v;
+ if(b.classList.contains("mdel")){var v=b.dataset.v,id=k+"|"+v;if(k==="statuses"&&LOCKED.indexOf(v)>=0)return toast(v+" is used by the dashboard and cannot be removed",true);
   if(mArm!==id){[].slice.call(document.querySelectorAll(".mdel.armed")).forEach(function(x){x.classList.remove("armed");x.textContent="\u00d7"});mArm=id;b.classList.add("armed");b.textContent="Remove?";return}
   mArm="";MS[k]=MS[k].filter(function(x){return x!==v});saveMS();pushMaster("remove",k,v);renderMasters();toast("Removed "+v)}};
 $("mgrid").onkeydown=function(e){if(e.key==="Enter"&&e.target.matches("input")){e.preventDefault();addM(e.target.dataset.k,e.target)}};
 function postMaster(op,kind,v){var u=$("url").value.trim();return fetch(u.split("?")[0],{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({key:keyOf(u),master:{op:op,kind:kind,value:v}})}).then(function(r){return r.json()})}
 function saveMastersToSheet(quiet){if(!isScript()){toast("Connect the Apps Script link first",true);return}var u=$("url").value.trim(),m=ms();
  fetch(u.split("?")[0]+"?key="+encodeURIComponent(keyOf(u))+"&masters=1").then(function(r){return r.json()}).then(function(j){
-  var jobs=[];["owners","cases"].forEach(function(k){var have=(j&&j[k])||[];m[k].forEach(function(n){if(have.indexOf(n)<0)jobs.push([k,n])})});
+  var jobs=[];["owners","cases","statuses"].forEach(function(k){if(k==="statuses"&&!(j&&Array.isArray(j.statuses)))return;var have=(j&&j[k])||[];m[k].forEach(function(n){if(have.indexOf(n)<0)jobs.push([k,n])})});
   if(!jobs.length){if(!quiet)toast("The sheet already has all these names");return}
   return jobs.reduce(function(p,jb){return p.then(function(){return postMaster("add",jb[0],jb[1])})},Promise.resolve()).then(function(){toast("Saved "+jobs.length+" name"+(jobs.length>1?"s":"")+" to the Masters tab")})}).catch(function(){toast("Could not save the lists to the sheet",true)})}
 $("msave").onclick=function(){saveMastersToSheet(false)};
