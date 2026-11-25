@@ -525,7 +525,8 @@ function push(i,set){var u=($("url").value||"").trim();
  if(u.indexOf("script.google.com")<0){say("Saved in this browser only. Add an Apps Script link to update the sheet.",false);return}
  var key="";try{key=new URL(u).searchParams.get("key")||""}catch(e){}
  say("Updating sheet\u2026");
- fetch(u.split("?")[0],{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({title:i.t,key:key,set:set})}).then(function(r){return r.json()}).then(function(j){say(j.ok?"Sheet updated: "+i.t:"Sheet not updated: "+(j.error||"unknown error"),!j.ok);if(j.ok)flushQ()}).catch(function(){enq(i.t,set);say("Could not reach the sheet. The change is kept here and will be sent on the next sync.",true)})}
+ fetch(u.split("?")[0],{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({title:i.t,key:key,set:set})}).then(function(r){return r.json()}).then(function(j){var bad="";if(j.ok&&j.shown)for(var k in j.shown){var want=set[k];if(want!==undefined&&j.shown[k]!==want)bad+="the sheet shows "+(j.shown[k]||"blank")+" for "+(k==="uat"?"UAT date":"Live date")+" instead of "+want+". "}
+ say(j.ok?(bad?"Date mismatch: "+bad:"Sheet updated: "+i.t):"Sheet not updated: "+(j.error||"unknown error"),!j.ok||!!bad);if(j.ok)flushQ()}).catch(function(){enq(i.t,set);say("Could not reach the sheet. The change is kept here and will be sent on the next sync.",true)})}
 function upd(i,f,v){var set={};
  if(f==="st"){var was=live(i);i.st=v;set.status=v;if(live(i)){i.liveD=new Date(TODAY);set.live=ds(i.liveD)}else if(was){i.liveD=null;set.live=""}}
  else if(f==="dev"){i.dev=v.trim()||"Unassigned";set.dev=v.trim()}
