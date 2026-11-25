@@ -297,7 +297,7 @@ input.ed{flex:none;width:130px;min-width:0}textarea.ed{width:100%;resize:vertica
 
 <div class="toast" id="toast" role="status"></div>
 <script>
-var CFG={scriptUrl:"https://script.google.com/macros/s/AKfycbxnC3FcgdXi28lXlpHVklDLbOGMWFHltItFjcUuCbeX-iQ72XPmRmZSUAHslH0_1iM5iA/exec?key=kccl2026"}; /* when hosting, paste your Apps Script link (https://script.google.com/.../exec?key=YOUR_KEY) between the quotes so every visitor loads the sheet automatically */
+var CFG={scriptUrl:"https://script.google.com/macros/s/AKfycbyU04yG--I3ycI2K2KhjGZVmJZY7CuQXTpTu0INbCjRPhzDQ7t0V4q-2VFkKoo-RwZWmA/exec?key=kccl2026"}; /* when hosting, paste your Apps Script link (https://script.google.com/.../exec?key=YOUR_KEY) between the quotes so every visitor loads the sheet automatically */
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var D=[
 ["Kerala",1,"CRF generation for digital customers","Generate CRF from LCO code only; no distributor or sub-distributor dependency.","Discussion point; document shared","20-11-2026","Moved to QA","Pavan"],
@@ -324,7 +324,7 @@ var isDone=function(i){return i.st==="Moved to UAT"||i.st==="Moved to Live"};
 var late=function(i){return !isDone(i)&&i.uat&&i.uat<TODAY};
 var soon=function(i){return !isDone(i)&&i.uat&&i.uat>=TODAY&&(i.uat-TODAY)/864e5<=3};
 var S={q:"",reg:"",st:"",dev:"",co:"",kpi:"",sort:"uat",asc:true};
-var ST=["To Do","In Progress","Moved to QA","Moved to UAT","Moved to Live"],LOCKED=["To Do","Moved to UAT","Moved to Live"],STOK=false;
+var ST=["To Do","In Progress","Moved to QA","Moved to UAT","Moved to Live"],LOCKED=["To Do","Moved to UAT","Moved to Live"],STOK=false,PV="2026-11-25b",SV="",DT=null;
 function stNames(){var m=typeof MS!=="undefined"?MS:null;if(!m){try{m=JSON.parse(localStorage.getItem("kee-masters-v1"))}catch(e){}}return m&&m.statuses&&m.statuses.length?m.statuses:ST}
 function stFor(cur){var l=ms().statuses.slice();if(cur&&l.indexOf(cur)<0)l.push(cur);return l}
 var SC={"To Do":"var(--mut)","In Progress":"var(--blu)","Moved to QA":"var(--amb)","Moved to UAT":"var(--acc)","Moved to Live":"var(--grn)"};
@@ -504,7 +504,7 @@ function sync(quiet){var u=$("url").value.trim();if(!u){if(!quiet)say("Paste a G
 $("sy").onclick=function(){sync(false)};
 function saveUrl(show){var u=$("url").value.trim();try{if(u)localStorage.setItem(URLK,u);else localStorage.removeItem(URLK);showSaved();if(show)say(u?"Link saved in this browser":"Link removed",false)}catch(e){say("This browser is blocking storage (private window or a privacy setting), so the link cannot be saved. Use a normal window or allow site data for this page.",true)}}
 function showSaved(){var u=null,ok=true;try{u=localStorage.getItem(URLK)}catch(e){ok=false}
- $("lk").textContent=!ok?"Storage is blocked in this browser, so nothing can be saved here.":u?"Saved in this browser: ..."+u.split("?")[0].slice(-18)+" (with key)":"No link saved in this browser yet."}
+ $("lk").textContent=(!ok?"Storage is blocked in this browser, so nothing can be saved here.":u?"Saved in this browser: ..."+u.split("?")[0].slice(-18)+" (with key)":"No link saved in this browser yet.")+"  Page version "+PV+" | Script version "+(SV||"not checked yet")}
 $("cp").onclick=function(){var u=$("url").value.trim();if(!u){say("Paste the link first.",true);return}
  var l=location.href.split("#")[0]+"#setup="+encodeURIComponent(btoa(u));
  (navigator.clipboard?navigator.clipboard.writeText(l):Promise.reject()).then(function(){say("Setup link copied. Open it once on the other device. Keep it private, it contains the key.",false)}).catch(function(){window.prompt("Copy this setup link:",l)})};
@@ -525,8 +525,8 @@ function push(i,set){var u=($("url").value||"").trim();
  if(u.indexOf("script.google.com")<0){say("Saved in this browser only. Add an Apps Script link to update the sheet.",false);return}
  var key="";try{key=new URL(u).searchParams.get("key")||""}catch(e){}
  say("Updating sheet\u2026");
- fetch(u.split("?")[0],{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({title:i.t,key:key,set:set})}).then(function(r){return r.json()}).then(function(j){var bad="";if(j.ok&&j.shown)for(var k in j.shown){var want=set[k];if(want!==undefined&&j.shown[k]!==want)bad+="the sheet shows "+(j.shown[k]||"blank")+" for "+(k==="uat"?"UAT date":"Live date")+" instead of "+want+". "}
- say(j.ok?(bad?"Date mismatch: "+bad:"Sheet updated: "+i.t):"Sheet not updated: "+(j.error||"unknown error"),!j.ok||!!bad);if(j.ok)flushQ()}).catch(function(){enq(i.t,set);say("Could not reach the sheet. The change is kept here and will be sent on the next sync.",true)})}
+ fetch(u.split("?")[0],{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({title:i.t,n:i.n,reg:i.reg,key:key,set:set})}).then(function(r){return r.json()}).then(function(j){var bad="";if(j.ok&&j.shown)for(var k in j.shown){var want=set[k];if(want!==undefined&&j.shown[k]!==want)bad+="the sheet shows "+(j.shown[k]||"blank")+" for "+(k==="uat"?"UAT date":"Live date")+" instead of "+want+". "}
+ say(j.ok?(bad?"Date mismatch: "+bad:"Sheet updated: "+i.t+(j.row?" (sheet row "+j.row+")":"")):"Sheet not updated: "+(j.error||"unknown error"),!j.ok||!!bad);if(j.ok)flushQ()}).catch(function(){enq(i.t,set);say("Could not reach the sheet. The change is kept here and will be sent on the next sync.",true)})}
 function upd(i,f,v){var set={};
  if(f==="st"){var was=live(i);i.st=v;set.status=v;if(live(i)){i.liveD=new Date(TODAY);set.live=ds(i.liveD)}else if(was){i.liveD=null;set.live=""}}
  else if(f==="dev"){i.dev=v.trim()||"Unassigned";set.dev=v.trim()}
@@ -537,7 +537,10 @@ function upd(i,f,v){var set={};
  else if(f==="cc"){i.note=v;set.cc=v}
  else if(f==="dr"){i.dr=v;i.open=!!v.trim();set.devrem=v}
  var ov=getOv();ov[i.t]=snap(i);setOv(ov);render();push(i,set)}
-$("tb").onchange=function(e){var s=e.target,f=s.dataset.f;if(f===undefined||s.classList.contains("pk"))return;upd(items[+s.dataset.i],f,s.value)};
+$("tb").onchange=function(e){var s=e.target,f=s.dataset.f;if(f===undefined||s.classList.contains("pk"))return;var i=items[+s.dataset.i],v=s.value;
+ if(f==="uat"||f==="live"){if(v){var y=+v.slice(0,4);if(y<2000||y>2100)return}
+  clearTimeout(DT);DT=setTimeout(function(){upd(i,f,v)},400);return}
+ upd(i,f,v)};
 $("tb").onclick=function(e){var m=e.target.closest(".more");if(m){EX[m.dataset.x]=!EX[m.dataset.x];table();return}var b=e.target.closest(".pk");if(b)openPick(b)};
 
 /* masters + pickers */
@@ -554,7 +557,7 @@ function keyOf(u){try{return new URL(u).searchParams.get("key")||""}catch(e){ret
 function isScript(){return ($("url").value||"").indexOf("script.google.com")>=0}
 function pushMaster(op,kind,v){if(!isScript())return;if(kind==="statuses"&&!STOK){toast("Status list saved in this browser only. Update the Apps Script to save it to the sheet.",true);return}var u=$("url").value.trim();
  fetch(u.split("?")[0],{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({key:keyOf(u),master:{op:op,kind:kind,value:v}})}).then(function(r){return r.json()}).then(function(j){if(!j.ok)toast("Sheet master list not updated: "+(j.error||"unknown error"),true)}).catch(function(){toast("Could not reach the sheet for the master list",true)})}
-function pullMasters(u){fetch(u.split("?")[0]+"?key="+encodeURIComponent(keyOf(u))+"&masters=1").then(function(r){return r.json()}).then(function(j){if(!j||!j.owners)return;STOK=Array.isArray(j.statuses);var c=ms();
+function pullMasters(u){fetch(u.split("?")[0]+"?key="+encodeURIComponent(keyOf(u))+"&masters=1").then(function(r){return r.json()}).then(function(j){if(!j||!j.owners)return;STOK=Array.isArray(j.statuses);SV=j.v||"old, please update the script";showSaved();var c=ms();
  MS={owners:j.owners.length?j.owners:c.owners,cases:j.cases&&j.cases.length?j.cases:c.cases,statuses:STOK&&j.statuses.length?j.statuses:c.statuses};saveMS();table();saveMastersToSheet(true)}).catch(function(){})}
 function curVal(){var i=items[PK.i];return PK.f==="dev"?(i.dev==="Unassigned"?"":i.dev):(i.co||"")}
 function fillPick(){var q=$("pq").value.trim().toLowerCase(),cv=curVal(),L=ms()[PK.f==="dev"?"owners":"cases"].filter(function(n){return n.toLowerCase().indexOf(q)>=0});
